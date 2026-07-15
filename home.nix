@@ -16,11 +16,29 @@ in
     jq        # json on the command line
     lazygit
     neovim
+    uv
     # the font everything renders in
     nerd-fonts.hack
   ];
   fonts.fontconfig.enable = true;
   home.sessionVariables.EDITOR = "nvim";
+
+  programs.git = {
+    enable = true;
+    settings.user = {
+      name = "Taehyoung Kim";
+      email = "kimtwintae@gmail.com";
+    };
+    includes = [
+      {
+        condition = "gitdir:~/dev/work/";
+        contents.user = {
+          name = "Taehyoung Kim";
+          email = "taehyoung.kim@ivi.fraunhofer.de";
+        };
+      }
+    ];
+  };
 
   programs.zsh = {
     enable = true;
@@ -66,6 +84,8 @@ in
   home.file.".claude/CLAUDE.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".codex/AGENTS.md".source =
+    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
+  home.file.".copilot/copilot-instructions.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";
   home.file.".config/opencode/AGENTS.md".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/AGENTS.md";

@@ -1,15 +1,15 @@
 # dotfiles
 
-Watch the walkthrough: https://youtu.be/5N-okeDdIuI
+This is my personal fork of [Kunchen's dotfiles](https://github.com/kunchenguid/dotfiles).
+The original walkthrough is available at https://youtu.be/5N-okeDdIuI.
 
 My personal Mac setup, managed with nix-darwin and home-manager.
 One repo, one command, and a fresh Mac ends up configured the same way every time.
 
 ## Contributing / Using This Repo
 
-These are my personal dotfiles, shared publicly so people can read them, learn from them, and fork them freely.
-Feature requests and pull requests are not accepted here, and PRs are auto-closed.
-If you find a bug, please open a GitHub Issue using the bug report template.
+These are my personal dotfiles, adapted from Kunchen's setup and shared publicly
+so people can read them, learn from them, and fork them freely.
 
 ## What you get
 
@@ -17,11 +17,11 @@ Running the switch builds:
 
 - System settings (dark mode, key repeat, dock, Finder, trackpad)
 - Homebrew apps (casks and CLI tools)
-- Nix user packages (ripgrep, fd, fzf, jq, lazygit, Neovim, Hack Nerd Font)
+- Nix user packages (ripgrep, fd, fzf, jq, lazygit, Neovim, uv, Hack Nerd Font)
 - Shell (zsh, aliases, starship prompt)
 - Editor (Neovim config with the rose-pine moon theme)
 - Terminal (WezTerm config with the rose-pine moon theme)
-- Agent configs (Claude, Codex, opencode all share one AGENTS.md)
+- Agent configs (Claude, Codex, Copilot, and opencode share one `AGENTS.md`)
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ Running the switch builds:
 On a brand new Mac, from a bare clone of this repo:
 
 ```sh
-git clone https://github.com/kunchenguid/dotfiles.git
+git clone https://github.com/GOMTAE/dotfiles.git
 cd dotfiles
 ```
 
@@ -84,23 +84,31 @@ No separate build-and-copy step.
 This repo is mine.
 If you clone it, review these before you run `bootstrap.sh`:
 
-- **Username**: run `./bootstrap.sh` (it detects your macOS username and offers to set it) OR change the single `user = "kunchen"` line in `flake.nix`.
+- **Username**: this fork uses `user = "tae"` in `flake.nix`. Run `./bootstrap.sh` to have it detect and offer to fix a different macOS username, or edit that line yourself.
   Everything else (`configuration.nix`, `home.nix`, home directory paths) is threaded from that one variable.
 - **Host label** `"mac"`, in three places: `flake.nix` (the `darwinConfigurations."mac"` name), `rebuild.sh:5` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
   All three have to match.
 - **CPU architecture**, `hostPlatform` in `configuration.nix` (see Prerequisites above).
 
-**Git identity:** this config deliberately does not set your git name or email.
-Git will stop your first commit and tell you to set them (`git config --global user.name "Your Name"` and `git config --global user.email you@example.com`).
-If you'd rather manage that declaratively, add this back to `home.nix` with your own identity:
+**Git identity:** `home.nix` sets my personal identity by default and switches to
+my work identity for repositories anywhere under `~/dev/work/`.
+Repositories under `~/dev/personal/` use the personal default.
+Replace both identities before using this configuration as your own:
 
 ```nix
 programs.git = {
   enable = true;
   settings.user = {
-    name = "Your Name";
-    email = "you@example.com";
+    name = "Personal Name";
+    email = "personal@example.com";
   };
+  includes = [{
+    condition = "gitdir:~/dev/work/";
+    contents.user = {
+      name = "Work Name";
+      email = "work@example.com";
+    };
+  }];
 };
 ```
 
@@ -115,7 +123,7 @@ If you don't use it, just remove it from `brews` in your copy.
 
 **Heads-up:**
 
-- `home/AGENTS.md` is my personal agent policy, and `home.nix` installs it for Claude, Codex, and opencode.
+- `home/AGENTS.md` is my personal agent policy, and `home.nix` installs it for Claude, Codex, Copilot, and opencode.
   If you clone this repo, you'd silently inherit my agent instructions - edit or delete `home/AGENTS.md` if you don't want that.
 - The `cc` and `co` shell aliases in `home.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
   They're convenient for me, but know what they do before you use them.
@@ -128,7 +136,25 @@ If you don't use it, just remove it from `brews` in your copy.
 - `home.nix` - user-level config: shell, packages, prompt, and the symlinks described below.
 - `rebuild.sh` - re-applies the config after the first switch.
   Run this every time you make a change.
+- `setup-agents.sh` - links only the shared agent instructions and personal
+  skills on macOS, Linux, or WSL, without installing the rest of this setup.
 - `home/` - the actual config files that get symlinked into place (Neovim, WezTerm, herdr, Claude settings, the shared `AGENTS.md`).
+
+## Portable agent setup
+
+On Linux or WSL, you can reuse only the agent instructions and personal skills
+without installing the macOS configuration:
+
+```sh
+git clone https://github.com/GOMTAE/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./setup-agents.sh
+```
+
+The script links the shared instructions for Codex, Claude Code, and Copilot CLI.
+It also links any agent-specific skills added under `home/skills/`. Keep reusable
+personal workflows here, but keep project-specific or confidential company
+instructions and skills in the repository that owns them.
 
 ## How the symlinks work
 

@@ -35,11 +35,28 @@
     onActivation.autoUpdate = true;
     onActivation.extraFlags = [ "--force" ];
     brews = [
+      "gcc"
+      "gh"
+      "git-lfs"
+      "gnu-sed"
       "herdr"
+      "jpeg-turbo"
+      "libomp"
+      "node"
+      "portaudio"
+      "pre-commit"
+      "rustup"
+      "tmux"
+      "tree"
     ];
     casks = [
-      "wezterm"
       "claude-code"
+      "codexbar"
+      "copilot-cli"
+      "devtoys"
+      "maccy"
+      "visual-studio-code"
+      "wezterm"
     ];
   };
 }
