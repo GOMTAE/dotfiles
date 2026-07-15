@@ -55,6 +55,13 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 4. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
 
+If Homebrew already exists, `nix-homebrew.autoMigrate = true` lets nix-homebrew
+take ownership of that installation while keeping its installed packages. The
+declared Homebrew cleanup policy is applied afterward.
+
+If Home Manager encounters an existing file it needs to manage, it preserves
+the original beside it with a `.pre-nix` suffix during the first activation.
+
 After that, `darwin-rebuild` exists and you're on the normal workflow below.
 
 ### Validate without applying
@@ -86,7 +93,7 @@ If you clone it, review these before you run `bootstrap.sh`:
 
 - **Username**: this fork uses `user = "tae"` in `flake.nix`. Run `./bootstrap.sh` to have it detect and offer to fix a different macOS username, or edit that line yourself.
   Everything else (`configuration.nix`, `home.nix`, home directory paths) is threaded from that one variable.
-- **Host label** `"mac"`, in three places: `flake.nix` (the `darwinConfigurations."mac"` name), `rebuild.sh:5` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
+- **Host label** `"mac"`, in three places: `flake.nix` (the `darwinConfigurations."mac"` name), `rebuild.sh` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
   All three have to match.
 - **CPU architecture**, `hostPlatform` in `configuration.nix` (see Prerequisites above).
 
@@ -125,6 +132,8 @@ If you don't use it, just remove it from `brews` in your copy.
 
 - `home/AGENTS.md` is my personal agent policy, and `home.nix` installs it for Claude, Codex, Copilot, and opencode.
   If you clone this repo, you'd silently inherit my agent instructions - edit or delete `home/AGENTS.md` if you don't want that.
+- `home/.claude/settings.json` enables the Superwhisper Claude Code plugin and
+  configures a lightweight model/context status line.
 - The `cc` and `co` shell aliases in `home.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
   They're convenient for me, but know what they do before you use them.
 
