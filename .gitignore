@@ -9,4 +9,4 @@ result
 result-*
 
 # no-mistakes local validation state - never commit in this public repo
-.no-mistakes/
+.no-mistakes/home/.config/herdr/release-notes.json

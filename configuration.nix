@@ -1,4 +1,4 @@
-{ user, ... }:
+{ pkgs, user, ... }:
 
 {
   # Determinate already manages the Nix daemon, so nix-darwin shouldn't.
@@ -60,4 +60,21 @@
       "wezterm"
     ];
   };
+  # Claude Code baseline (decision 0003): managed settings, not the user file.
+  system.activationScripts.postActivation.text = let
+    claudeManaged = pkgs.writeText "claude-managed.json" (builtins.toJSON {
+      env = {
+        IMPECCABLE_NO_TELEMETRY = "1";
+        PLANNOTATOR_SHARE = "disabled";
+      };
+      extraKnownMarketplaces = {
+        plannotator.source = { source = "github"; repo = "backnotprop/plannotator"; };
+        anthropic-agent-skills.source = { source = "github"; repo = "anthropics/skills"; };
+      };
+    });
+  in ''
+    install -d -m 755 "/Library/Application Support/ClaudeCode/managed-settings.d"
+    install -m 644 ${claudeManaged} \
+      "/Library/Application Support/ClaudeCode/managed-settings.d/10-dotfiles.json"
+  '';
 }
