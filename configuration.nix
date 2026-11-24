@@ -70,6 +70,10 @@
       extraKnownMarketplaces = {
         plannotator.source = { source = "github"; repo = "backnotprop/plannotator"; };
         anthropic-agent-skills.source = { source = "github"; repo = "anthropics/skills"; };
+        gomtae-home = { source = { source = "github"; repo = "GOMTAE/home"; }; autoUpdate = true; };
+      };
+      enabledPlugins = {
+        "personal@gomtae-home" = true;
       };
     });
   in ''
