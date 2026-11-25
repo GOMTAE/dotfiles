@@ -50,7 +50,7 @@ Change the host label or CPU architecture if needed, and read the Homebrew clean
 
 1. Installs Determinate Nix, if it isn't already installed.
 2. Symlinks this repo to `~/.dotfiles`.
-   This has to happen before the first build, because `home.nix` points at config files through `~/.dotfiles`.
+   This has to happen before the first build, because `home/common.nix` points at config files through `~/.dotfiles`.
 3. Checks the `user` configured in `flake.nix` against your actual macOS username, and offers to fix it for you if they differ.
 4. Runs the first `darwin-rebuild switch`.
    It fetches the `darwin-rebuild` tool from the nix-darwin 26.05 release branch, then applies this repo's locked flake config.
@@ -92,12 +92,12 @@ This repo is mine.
 If you clone it, review these before you run `bootstrap.sh`:
 
 - **Username**: this fork uses `user = "tae"` in `flake.nix`. Run `./bootstrap.sh` to have it detect and offer to fix a different macOS username, or edit that line yourself.
-  Everything else (`configuration.nix`, `home.nix`, home directory paths) is threaded from that one variable.
+  Everything else (`configuration.nix`, `home/*.nix`, home directory paths) is threaded from that one variable.
 - **Host label** `"mac"`, in three places: `flake.nix` (the `darwinConfigurations."mac"` name), `rebuild.sh` (the `#mac` at the end of the flake reference), and `bootstrap.sh`'s first-switch command (also `#mac`).
   All three have to match.
 - **CPU architecture**, `hostPlatform` in `configuration.nix` (see Prerequisites above).
 
-**Git identity:** `home.nix` sets my personal identity by default and switches to
+**Git identity:** `home/common.nix` sets my personal identity by default and switches to
 my work identity for repositories anywhere under `~/dev/work/`.
 Repositories under `~/dev/personal/` use the personal default.
 Replace both identities before using this configuration as your own:
@@ -130,11 +130,11 @@ If you don't use it, just remove it from `brews` in your copy.
 
 **Heads-up:**
 
-- `home/AGENTS.md` is my personal agent policy, and `home.nix` installs it for Claude, Codex, Copilot, and opencode.
+- `home/AGENTS.md` is my personal agent policy, and `home/common.nix` installs it for Claude, Codex, Copilot, and opencode.
   If you clone this repo, you'd silently inherit my agent instructions - edit or delete `home/AGENTS.md` if you don't want that.
 - `home/.claude/settings.json` enables the Superwhisper Claude Code plugin and
   configures a lightweight model/context status line.
-- The `cc` and `co` shell aliases in `home.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
+- The `cc` and `co` shell aliases in `home/common.nix` are high-agency shortcuts: `claude --dangerously-skip-permissions` and `codex --full-auto`.
   They're convenient for me, but know what they do before you use them.
 
 ## Repo tour
@@ -142,17 +142,38 @@ If you don't use it, just remove it from `brews` in your copy.
 - `flake.nix` - the entry point.
   Wires up nixpkgs, nix-darwin, home-manager, and nix-homebrew, and declares the `mac` machine.
 - `configuration.nix` - system-level config: macOS defaults, Homebrew.
-- `home.nix` - user-level config: shell, packages, prompt, and the symlinks described below.
+- `home.nix` - the Mac's user-level entry point: imports `home/common.nix` and `home/darwin.nix`.
+- `home/common.nix` - user-level config shared by every machine: shell, packages, prompt, and the symlinks described below.
+- `home/darwin.nix` - macOS-only user-level parts (home directory, WezTerm link).
+- `home/linux.nix` - Linux and WSL-only parts (home directory, hq's packages, npm prefix).
 - `rebuild.sh` - re-applies the config after the first switch.
   Run this every time you make a change.
 - `setup-agents.sh` - links only the shared agent instructions and personal
-  skills on macOS, Linux, or WSL, without installing the rest of this setup.
+  skills on macOS, Linux, or WSL, for machines without Nix.
 - `home/` - the actual config files that get symlinked into place (Neovim, WezTerm, herdr, Claude settings, the shared `AGENTS.md`).
 
-## Portable agent setup
+## Linux and WSL
 
-On Linux or WSL, you can reuse only the agent instructions and personal skills
-without installing the macOS configuration:
+The same flake also builds a standalone home-manager configuration for x86_64 Linux (WSL2 and Ubuntu laptops).
+It shares `home/common.nix` with the Mac (packages, git, zsh, starship, Neovim, herdr, shared agent instructions) and adds `home/linux.nix` (home directory, the packages hq needs, an npm prefix in `~/.npm-global`).
+macOS-only parts (WezTerm link, home directory) stay in `home/darwin.nix`.
+
+1. Install Nix with the Determinate installer: `curl -fsSL https://install.determinate.systems/nix | sh -s -- install`
+2. Clone to `~/.dotfiles`: `git clone https://github.com/GOMTAE/dotfiles.git ~/.dotfiles`
+3. Apply: `nix run home-manager -- switch --flake ~/.dotfiles#<user>@linux`
+   (`<user>` is the `user` variable in `flake.nix`, `tae` by default; change it there if your Linux username differs.)
+4. The root-only steps Nix cannot do for you:
+   - WSL: enable systemd with `[boot]` / `systemd=true` in `/etc/wsl.conf`, then `wsl --shutdown`.
+   - `sudo apt install bubblewrap socat`. bubblewrap comes from apt on purpose: Ubuntu 24.04's AppArmor only allows `/usr/bin/bwrap`.
+   - WSL: run Tailscale inside WSL.
+   - WSL: keep repos under `~`, not `/mnt/c`.
+5. Set up hq afterwards with `hq setup`.
+
+Nothing here touches the Mac: `darwinConfigurations.mac` is unchanged.
+
+### Without Nix
+
+On a machine without Nix, you can reuse only the agent instructions and personal skills:
 
 ```sh
 git clone https://github.com/GOMTAE/dotfiles.git ~/dotfiles
@@ -168,7 +189,7 @@ instructions and skills in the repository that owns them.
 ## How the symlinks work
 
 The files under `home/` are the real files - editing them here is editing your live config, no rebuild needed to see the change in your editor.
-`home.nix` uses `mkOutOfStoreSymlink` to point paths like `~/.config/nvim` straight at `home/.config/nvim` in this repo, so the two never drift out of sync.
+`home/common.nix` uses `mkOutOfStoreSymlink` to point paths like `~/.config/nvim` straight at `home/.config/nvim` in this repo, so the two never drift out of sync.
 You only run `./rebuild.sh` when you change something that isn't just a symlinked file, like a package list or a system default.
 
 ## Notes
