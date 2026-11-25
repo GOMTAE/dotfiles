@@ -11,5 +11,11 @@
   If something clearly looks off, even if it is not directly related to what you are doing, try to get it fixed along the way.
 - Apply that same high standard to engineering excellence: lint, test failures, and test flakiness.
   If you see one, even if it is not caused by what you are working on right now, still get it fixed.
-
-
+- Code and tests are the source of truth. Write a comment only for what the code cannot say
+  (a constraint from outside, a public contract, a link to the issue); never narrate what the
+  code does. Fix or delete a stale doc instead of adding a new one.
+- Make the smallest change that solves the problem. Delete dead code, redundant checks and
+  stale docs before adding anything.
+- Minimize what a reader has to hold in their head: fewer layers between a question and its
+  answer, no one-caller wrappers, small mutable scope.
+- Encode a lesson as a check (test, type, lint, CI) before writing it as a rule.
