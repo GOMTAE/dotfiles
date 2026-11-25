@@ -142,7 +142,6 @@ If you don't use it, just remove it from `brews` in your copy.
 - `flake.nix` - the entry point.
   Wires up nixpkgs, nix-darwin, home-manager, and nix-homebrew, and declares the `mac` machine.
 - `configuration.nix` - system-level config: macOS defaults, Homebrew.
-- `home.nix` - the Mac's user-level entry point: imports `home/common.nix` and `home/darwin.nix`.
 - `home/common.nix` - user-level config shared by every machine: shell, packages, prompt, and the symlinks described below.
 - `home/darwin.nix` - macOS-only user-level parts (home directory, WezTerm link).
 - `home/linux.nix` - Linux and WSL-only parts (home directory, hq's packages, npm prefix).

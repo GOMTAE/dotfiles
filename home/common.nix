@@ -1,6 +1,6 @@
 { config, pkgs, user, ... }:
 
-# Everything that is not macOS-specific. Shared by the Mac (via home.nix)
+# Everything that is not macOS-specific. Shared by the Mac (with home/darwin.nix)
 # and by Linux/WSL (via flake.nix's homeConfigurations."<user>@linux").
 
 let
