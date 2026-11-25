@@ -1,12 +1,14 @@
 { config, pkgs, user, ... }:
 
+# Everything that is not macOS-specific. Shared by the Mac (with home/darwin.nix)
+# and by Linux/WSL (via flake.nix's homeConfigurations."<user>@linux").
+
 let
   dotfiles = "${config.home.homeDirectory}/.dotfiles";
 in
 
 {
   home.username = user;
-  home.homeDirectory = "/Users/${user}";
   home.stateVersion = "24.11";
   home.packages = with pkgs; [
     # cli i use constantly
@@ -72,8 +74,7 @@ in
   };
 
   # Edit-in-place: the real file stays in my repo, ~/.config just points at it.
-  home.file.".config/wezterm".source =
-    config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/wezterm";
+  # (The wezterm link is macOS-only and lives in darwin.nix.)
   home.file.".config/nvim".source =
     config.lib.file.mkOutOfStoreSymlink "${dotfiles}/home/.config/nvim";
   home.file.".config/herdr".source =

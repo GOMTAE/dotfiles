@@ -32,8 +32,27 @@
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "pre-nix";
             home-manager.extraSpecialArgs = { inherit user; };
-            home-manager.users.${user} = import ./home.nix;
+            # common.nix is the user's direct module and darwin.nix goes through
+            # sharedModules: this keeps the Mac's module merge order (package
+            # order, .zshrc layout) and so the Mac system unchanged. Wrapping both
+            # in an imports list would reorder them.
+            home-manager.sharedModules = [ ./home/darwin.nix ];
+            home-manager.users.${user} = import ./home/common.nix;
           }
+        ];
+      };
+
+      # Linux and WSL2 (x86_64): standalone home-manager, sharing home/common.nix
+      # with the Mac. Apply with:
+      #   nix run home-manager -- switch --flake ~/.dotfiles#<user>@linux
+      # This reuses the `nixpkgs` input above (a darwin channel branch that still
+      # carries x86_64-linux packages). A separate Linux channel input can come later.
+      homeConfigurations."${user}@linux" = home-manager.lib.homeManagerConfiguration {
+        pkgs = nixpkgs.legacyPackages.x86_64-linux;
+        extraSpecialArgs = { inherit user; };
+        modules = [
+          ./home/common.nix
+          ./home/linux.nix
         ];
       };
     };

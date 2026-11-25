@@ -16,7 +16,7 @@ else
 fi
 
 echo "==> Step 2: symlink this repo to ~/.dotfiles"
-# home.nix resolves its mkOutOfStoreSymlink paths through ~/.dotfiles, so this
+# home/common.nix resolves its mkOutOfStoreSymlink paths through ~/.dotfiles, so this
 # has to exist before the first switch or the build will fail to find them.
 ln -sfn "$DIR" ~/.dotfiles
 
