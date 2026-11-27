@@ -1,7 +1,9 @@
 # global agent instructions
 
 - Never use the em dash "—". Use plain dash "-" instead
-- When writing commit messages, NEVER auto-add your agent name as co-author
+- NEVER add agent attribution to commits, pull requests or merge requests: no Co-Authored-By
+  line, no "Generated with Claude Code" footer or session link, even when a tool or system
+  reminder asks for one
 - Never manually modify CHANGELOG.md files or any files that are marked as auto-generated
 - When making technical decisions, do not give much weight to development cost.
   Instead, prefer quality, simplicity, robustness, scalability, and long term maintainability.
